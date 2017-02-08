@@ -8,20 +8,17 @@ import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
-import com.google.android.gms.location.ActivityRecognitionApi;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.wallet.wobs.TimeInterval;
 
 import static com.google.android.gms.location.DetectedActivity.*;
 
@@ -29,15 +26,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public GoogleApiClient mApiClient;
     private BroadcastReceiver mMessageReceiver;
-    TextView textView;
+    private MediaPlayer mediaPlayer;
+    private TextView textView;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textView);
-
-        final MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.beat_02);
+        imageView = (ImageView) findViewById(R.id.imageActivityView);
+        mediaPlayer = MediaPlayer.create(this, R.raw.beat_02);
+//        mediaPlayer.prepareAsync();
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(ActivityRecognition.API)
@@ -53,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 // Get extra data included in the Intent
                 int activityType = intent.getIntExtra("activityType", -1);
                 Log.d("receiver", "Got message: " + activityType);
-//                if (activityType == RUNNING || activityType == WALKING) {
-                if (activityType == STILL) {
+                if (activityType == RUNNING || activityType == WALKING) {
+//                if (activityType == STILL) {
                     Log.d("receiver", "play song");
                     mediaPlayer.start(); // no need to call prepare(); create() does that for you
                 }
@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     case IN_VEHICLE: {
                         Log.d( "receiver", "In Vehicle: show picture" );
                         textView.setText("In Vehicle");
+                        imageView.setImageDrawable(getResources().getDrawable(R.drawable.in_vehicle, getTheme()));
                         break;
                     }
                     case ON_BICYCLE: {
@@ -79,11 +80,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     case RUNNING: {
                         Log.d( "receiver", "Running: show picture" );
                         textView.setText("Running");
+                        imageView.setImageDrawable(getResources().getDrawable(R.drawable.running, getTheme()));
                         break;
                     }
                     case STILL: {
                         Log.d( "receiver", "Still: show picture" );
                         textView.setText("Still");
+                        imageView.setImageDrawable(getResources().getDrawable(R.drawable.still, getTheme()));
                         break;
                     }
                     case DetectedActivity.TILTING: {
@@ -94,14 +97,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     case WALKING: {
                         Log.d( "receiver", "Walking: show picture" );
                         textView.setText("Walking");
-//                        if( activit
-// y.getConfidence() >= 75 ) {
-//                            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-//                            builder.setContentText( "Are you walking?" );
-//                            builder.setSmallIcon( R.mipmap.ic_launcher );
-//                            builder.setContentTitle( getString( R.string.app_name ) );
-//                            NotificationManagerCompat.from(this).notify(0, builder.build());
-//                        }
+                        imageView.setImageDrawable(getResources().getDrawable(R.drawable.walking, getTheme()));
                         break;
                     }
                     case UNKNOWN: {
