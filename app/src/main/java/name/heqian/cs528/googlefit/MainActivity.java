@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textView);
 
+        final MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.beat_02);
+
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
@@ -50,6 +53,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 // Get extra data included in the Intent
                 int activityType = intent.getIntExtra("activityType", -1);
                 Log.d("receiver", "Got message: " + activityType);
+//                if (activityType == RUNNING || activityType == WALKING) {
+                if (activityType == STILL) {
+                    Log.d("receiver", "play song");
+                    mediaPlayer.start(); // no need to call prepare(); create() does that for you
+                }
+                else {
+                    Log.d("receiver", "pause song");
+                    mediaPlayer.pause();
+                }
                 switch( activityType ) {
                     case IN_VEHICLE: {
                         Log.d( "receiver", "In Vehicle: show picture" );
