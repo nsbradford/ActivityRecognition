@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -29,7 +30,21 @@ public class ActivityRecognizedService extends IntentService {
         if(ActivityRecognitionResult.hasResult(intent)) {
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
             handleDetectedActivities( result.getProbableActivities() );
+
+            // Get the most probable activity from the list of activities in the update
+            DetectedActivity mostProbableActivity = result.getMostProbableActivity();
+
+// Get the type of activity
+            int activityType = mostProbableActivity.getType();
+            sendMessageToActivity(activityType);
         }
+    }
+
+    private void sendMessageToActivity(int activityType) {
+        Log.d("sender", "Broadcasting message");
+        Intent intent = new Intent("ActivityTypeUpdates");
+        intent.putExtra("activityType", activityType);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void handleDetectedActivities(List<DetectedActivity> probableActivities) {
